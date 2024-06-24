@@ -954,6 +954,9 @@ class Bremsstrahlung(BaseElectron):
 
     def _sigma_ee(self, gam, Eph):
         eps = (Eph / mec2).decompose().value
+        e_rel = Eph.copy()
+        e_rel[e_rel.value<1e-12] = 0
+        eps_rel = (e_rel/mec2).decompose().value
         # initialize shape and units of cross section
         sigma = np.zeros_like(gam * eps) * u.Unit(u.cm ** 2 / Eph.unit)
         gam_trans = (2 * u.MeV / mec2).decompose().value
@@ -968,7 +971,7 @@ class Bremsstrahlung(BaseElectron):
             rel_matrix = np.where(gam * np.ones_like(gam * eps) > gam_trans)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                sigma[rel_matrix] = self._sigma_ee_rel(gam, eps)[rel_matrix]
+                sigma[rel_matrix] = self._sigma_ee_rel(gam, eps_rel)[rel_matrix]
 
         return sigma.to(u.cm ** 2 / Eph.unit)
 
